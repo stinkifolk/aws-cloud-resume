@@ -1,17 +1,46 @@
-// import * as cdk from 'aws-cdk-lib/core';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as Infrastructure from '../lib/infrastructure-stack';
+import { describe, test } from "vitest";
+import * as cdk from "aws-cdk-lib/core";
+import { Template } from "aws-cdk-lib/assertions";
+import { InfrastructureStack } from "../lib/infrastructure-stack";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/infrastructure-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new Infrastructure.InfrastructureStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+describe("InfrastructureStack", () => {
+  test("creates the Cloud Resume S3 bucket", () => {
+    const originalCwd = process.cwd();
+    process.chdir(path.resolve(__dirname, ".."));
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+    try {
+      const projectOutDir = path.resolve(__dirname, "../../out");
+
+      fs.mkdirSync(projectOutDir, { recursive: true });
+
+      const projectFile = path.join(projectOutDir, "index.html");
+
+      if (!fs.existsSync(projectFile)) {
+        fs.writeFileSync(
+          projectFile,
+          "<html><body>Test</body></html>"
+        );
+      }
+
+      const app = new cdk.App();
+      const stack = new InfrastructureStack(app, "TestStack");
+      const template = Template.fromStack(stack);
+
+      template.hasResourceProperties("AWS::S3::Bucket", {
+        BucketEncryption: {
+          ServerSideEncryptionConfiguration: [
+            {
+              ServerSideEncryptionByDefault: {
+                SSEAlgorithm: "AES256",
+              },
+            },
+          ],
+        },
+      });
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
 });
