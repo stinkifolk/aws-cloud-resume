@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { parseVisitorCount } from "../lib/visitor-counter";
 
 // Regional timezone abbreviation map for common IANA zones
 const TIMEZONE_ABBREVIATIONS: Record<string, string> = {
@@ -154,12 +155,7 @@ export function VisitorInfoBar() {
         if (res.ok) {
           const data = await res.json();
           // AWS API Gateway returns JSON format: { "visits": 3 }
-          const visits =
-            typeof data?.visits === "number"
-              ? data.visits
-              : typeof data?.count === "number"
-                ? data.count
-                : null;
+          const visits = parseVisitorCount(data);
 
           if (!isCancelled && visits !== null && !Number.isNaN(visits)) {
             setVisitorCount(visits);
