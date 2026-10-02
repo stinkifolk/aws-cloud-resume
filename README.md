@@ -1,22 +1,62 @@
 # AWS Cloud Resume Challenge
 
-A serverless resume website built and deployed on AWS as part of the [AWS Cloud Resume Challenge](https://github.com/stinkifolk).
+A serverless resume website built and deployed on AWS as a practical implementation of the [AWS Cloud Resume Challenge](https://github.com/stinkifolk).
 
 **Live website:** https://cloud.ama24.my
 
+---
+
 ## Overview
 
-This project is a static, serverless resume website deployed using AWS services.
+This project is a static, serverless resume website built with Next.js and deployed on AWS.
 
-The project combines a Next.js static export with Amazon S3, Amazon CloudFront, Amazon API Gateway, AWS Lambda, and Amazon DynamoDB.
+The application uses:
 
-The visitor counter is fully serverless. When a visitor opens the website, the frontend sends a request to API Gateway. API Gateway invokes a Lambda function, which increments the visitor count stored in DynamoDB and returns the updated count to the browser.
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* Amazon S3
+* Amazon CloudFront
+* AWS Lambda
+* Amazon API Gateway
+* Amazon DynamoDB
+* AWS Certificate Manager
+* AWS CDK
+* IAM
+* Cloudflare DNS
+* GitHub Actions
+* Vitest
 
-The website is served securely through CloudFront while the S3 bucket remains private.
+The resume is exported as static files and served through Amazon CloudFront from a private Amazon S3 bucket.
+
+A serverless visitor counter is implemented using API Gateway, Lambda, and DynamoDB.
+
+The infrastructure is defined using AWS CDK and the project includes automated testing and CI/CD through GitHub Actions.
 
 ---
 
-## Architecture
+## Live Deployment
+
+**Website:**
+
+```text
+https://cloud.ama24.my
+```
+
+**AWS Region:**
+
+```text
+ap-southeast-1
+```
+
+**Status:** Production / Live
+
+---
+
+# Architecture
+
+## Website Delivery
 
 ```text
                          ┌─────────────────────┐
@@ -40,36 +80,44 @@ The website is served securely through CloudFront while the S3 bucket remains pr
                          ┌─────────────────────┐
                          │     Amazon S3       │
                          │   Private Bucket    │
-                         │   Static Website    │
+                         │                     │
+                         │  Static Resume      │
                          │       Files         │
                          └─────────────────────┘
+```
 
+The S3 bucket is private.
 
-Visitor Counter
+CloudFront uses **Origin Access Control (OAC)** to retrieve objects from S3.
 
+Visitors therefore access the website through CloudFront rather than directly through S3.
+
+---
+
+## Visitor Counter
+
+```text
 Visitor Browser
-      │
-      │ GET /visitor
-      ▼
+       │
+       │ GET /visitor
+       ▼
 ┌─────────────────────┐
 │   Amazon API        │
 │      Gateway        │
-│   HTTP API          │
+│      HTTP API       │
 └──────────┬──────────┘
            │
            ▼
 ┌─────────────────────┐
 │     AWS Lambda      │
-│ cloud-resume-       │
-│ visitor-counter     │
+│  Visitor Counter    │
 └──────────┬──────────┘
            │
            │ UpdateItem
            ▼
 ┌─────────────────────┐
 │  Amazon DynamoDB    │
-│ cloud-resume-       │
-│ visitors            │
+│  Visitor Counter    │
 └──────────┬──────────┘
            │
            │ Updated count
@@ -83,25 +131,30 @@ Visitor Browser
         Browser
 ```
 
----
-
-## AWS Services
-
-| Service                         | Purpose                                                      |
-| ------------------------------- | ------------------------------------------------------------ |
-| **Amazon S3**                   | Stores the static website files                              |
-| **Amazon CloudFront**           | CDN, HTTPS, caching and secure access to S3                  |
-| **Origin Access Control (OAC)** | Keeps the S3 bucket private while allowing CloudFront access |
-| **AWS Lambda**                  | Serverless backend for the visitor counter                   |
-| **Amazon API Gateway**          | Public HTTP API endpoint for the visitor counter             |
-| **Amazon DynamoDB**             | Stores the visitor count                                     |
-| **AWS Certificate Manager**     | TLS certificate for `cloud.ama24.my`                         |
-| **Cloudflare DNS**              | DNS management for the custom domain                         |
-| **IAM**                         | Authentication and least-privilege permissions               |
+The Lambda function atomically increments the visitor count stored in DynamoDB and returns the updated value to the frontend.
 
 ---
 
-## Frontend
+# AWS Services
+
+| Service                     | Purpose                                           |
+| --------------------------- | ------------------------------------------------- |
+| **Amazon S3**               | Stores the static resume website                  |
+| **Amazon CloudFront**       | CDN, HTTPS, caching, and secure S3 delivery       |
+| **Origin Access Control**   | Allows CloudFront to access the private S3 bucket |
+| **AWS Lambda**              | Runs the visitor-counter backend                  |
+| **Amazon API Gateway**      | Provides the HTTP API endpoint                    |
+| **Amazon DynamoDB**         | Stores the visitor counter                        |
+| **AWS Certificate Manager** | Provides the TLS certificate for `cloud.ama24.my` |
+| **AWS CDK**                 | Defines and provisions AWS infrastructure as code |
+| **IAM**                     | Controls AWS access and resource permissions      |
+| **Cloudflare DNS**          | Manages DNS for `ama24.my`                        |
+| **GitHub Actions**          | Runs CI checks and deployment automation          |
+| **Vitest**                  | Runs frontend and infrastructure tests            |
+
+---
+
+# Frontend
 
 The resume is built using:
 
@@ -109,34 +162,37 @@ The resume is built using:
 * React
 * TypeScript
 * Tailwind CSS
-* Static export
 
-The application is exported into an `out/` directory and uploaded to Amazon S3.
+The application uses Next.js static export.
 
-Because the production website is served as static files, the Next.js application does not require a continuously running Node.js server.
-
-### Build
+The configuration generates an `out/` directory containing the deployable static website.
 
 ```bash
 pnpm install
 pnpm build
 ```
 
-The production files are generated in:
+The resulting structure is approximately:
 
 ```text
 out/
+├── index.html
+├── 404.html
+├── _next/
+└── ...
 ```
 
-The contents of `out/` are uploaded to the root of the S3 bucket.
+There is no continuously running Next.js application server in production.
+
+The static files are delivered through Amazon CloudFront.
 
 ---
 
-## Visitor Counter
+# Visitor Counter
 
-The visitor counter follows a serverless architecture.
+The visitor counter is implemented as a serverless backend.
 
-### Request flow
+## Request Flow
 
 ```text
 Browser
@@ -148,7 +204,7 @@ API Gateway
    ▼
 Lambda
    │
-   │ DynamoDB UpdateItem
+   │ UpdateItem
    ▼
 DynamoDB
    │
@@ -163,17 +219,16 @@ API Gateway
 Browser
 ```
 
-The DynamoDB table contains a single counter item:
+The DynamoDB counter uses an item similar to:
 
-```text
-id       visits
-----------------
-counter  7
+```json
+{
+  "id": "counter",
+  "visits": 19
+}
 ```
 
-The Lambda function uses DynamoDB's atomic `ADD` operation to increment the counter.
-
-### Lambda logic
+The Lambda function uses DynamoDB's atomic `ADD` operation:
 
 ```python
 response = table.update_item(
@@ -190,99 +245,89 @@ The API returns:
 
 ```json
 {
-  "visits": 7
+  "visits": 19
 }
 ```
 
+The actual visitor count changes as visitors access the website.
+
 ---
 
-## API Gateway
+# API Gateway
 
-The project uses an HTTP API.
+The visitor counter uses an Amazon API Gateway HTTP API.
 
-### Endpoint
+## Endpoint
 
 ```text
 GET /visitor
 ```
 
-The frontend uses the API URL through an environment variable:
+The frontend receives the API URL through an environment variable:
 
 ```env
 NEXT_PUBLIC_VISITOR_API_URL=https://<api-id>.execute-api.<region>.amazonaws.com/visitor
 ```
 
-The API is intentionally public because the website needs to request the visitor count without requiring user authentication.
+The API exposes only the required `GET /visitor` route.
 
-CORS is configured to allow requests from:
-
-```text
-https://cloud.ama24.my
-```
-
-Only the required `GET` method is enabled.
+CORS is configured at the API Gateway level to allow browser requests.
 
 ---
 
-## Lambda
+# AWS Lambda
 
-Lambda function:
+The visitor counter runs on AWS Lambda.
 
-```text
-cloud-resume-visitor-counter
-```
+## Configuration
 
-Runtime:
+**Runtime:**
 
 ```text
 Python 3.14
 ```
 
-Handler:
+**Handler:**
 
 ```text
-lambda_function.lambda_handler
+index.handler
 ```
 
-The Lambda execution role uses:
-
-* `AWSLambdaBasicExecutionRole`
-* A custom DynamoDB policy
-
-The DynamoDB policy is restricted to the specific visitor-counter table.
-
-Required DynamoDB permissions:
+The function receives the DynamoDB table name through an environment variable.
 
 ```text
-dynamodb:GetItem
-dynamodb:UpdateItem
+TABLE_NAME
 ```
 
-This keeps the Lambda permissions limited to the operations required by the application.
+The Lambda function updates the visitor counter using DynamoDB.
+
+The infrastructure grants the Lambda function access to the visitor table through AWS CDK.
 
 ---
 
-## DynamoDB
+# DynamoDB
 
-Table:
+The visitor counter uses an Amazon DynamoDB table.
+
+**Table:**
 
 ```text
 cloud-resume-visitors
 ```
 
-Region:
+**Region:**
 
 ```text
 ap-southeast-1
 ```
 
-Partition key:
+**Partition key:**
 
 ```text
 id
 ```
 
-Type:
+**Type:**
 
 ```text
 String
@@ -293,21 +338,30 @@ Example item:
 ```json
 {
   "id": "counter",
-  "visits": 7
+  "visits": 19
 }
 ```
 
-The table uses on-demand capacity because the application has a small and unpredictable traffic pattern.
+The table uses on-demand capacity through DynamoDB's pay-per-request billing mode.
+
+This avoids provisioning a fixed read/write capacity for a small and unpredictable workload.
 
 ---
 
-## Amazon S3
+# Amazon S3
 
-The production website is stored in a private S3 bucket.
+The production resume files are stored in a private Amazon S3 bucket.
 
-The bucket does **not** use S3 static website hosting.
+The bucket uses:
 
-Instead:
+* S3 Block Public Access
+* S3-managed encryption
+* Versioning
+* CloudFront Origin Access Control
+
+The bucket does **not** need to be publicly accessible.
+
+The request path is:
 
 ```text
 Browser
@@ -319,97 +373,246 @@ Origin Access Control
 Private S3 bucket
 ```
 
-S3 Block Public Access remains enabled.
-
-This means users cannot directly access the S3 bucket as a public website.
-
-CloudFront is the public entry point.
+CloudFront is therefore the public entry point for the website.
 
 ---
 
-## Amazon CloudFront
+# Amazon CloudFront
 
-CloudFront provides:
+Amazon CloudFront provides:
 
 * HTTPS
 * CDN delivery
-* Caching
+* Edge caching
 * Custom domain support
-* Secure access to the private S3 bucket
+* Secure access to the private S3 origin
 
-Origin Access Control is used instead of making the S3 bucket public.
+The CloudFront distribution uses an Origin Access Control to access the S3 bucket.
 
-### Custom domain
+## Custom Domain
 
 ```text
 https://cloud.ama24.my
 ```
 
-CloudFront uses an ACM certificate issued in the `us-east-1` region.
+The CloudFront distribution uses an ACM certificate for the custom domain.
 
-The Cloudflare DNS record points the subdomain to the CloudFront distribution.
+The certificate is provisioned in:
+
+```text
+us-east-1
+```
+
+CloudFront requires ACM certificates used for CloudFront distributions to be provisioned in `us-east-1`.
+
+---
+
+# Cloudflare DNS
+
+Cloudflare manages DNS for:
+
+```text
+ama24.my
+```
+
+The production subdomain is:
 
 ```text
 cloud.ama24.my
-        ↓
-Cloudflare DNS
-        ↓
-CloudFront
 ```
 
----
-
-## Cloudflare
-
-Cloudflare is used for DNS management.
-
-DNS configuration:
+The DNS flow is:
 
 ```text
-Type:   CNAME
-Name:   cloud
-Target: <CloudFront distribution domain>
-Proxy:  DNS only
+cloud.ama24.my
+       ↓
+Cloudflare DNS
+       ↓
+CloudFront
+       ↓
+Private S3
 ```
 
-Cloudflare is currently being used as the DNS provider rather than as the application's CDN.
+Cloudflare is currently used as the DNS provider.
 
-CloudFront handles the CDN and HTTPS delivery.
+Amazon CloudFront handles the CDN and HTTPS delivery.
 
 ---
 
-## IAM
+# Infrastructure as Code
 
-A dedicated IAM user was created for this AWS project rather than using the root account for everyday work.
+The AWS infrastructure is defined using **AWS CDK** rather than being maintained entirely through manual AWS Console configuration.
 
-MFA is enabled.
+The CDK application is located in:
+
+```text
+infrastructure/
+```
+
+The main stack is:
+
+```text
+InfrastructureStack
+```
+
+The stack defines resources including:
+
+* S3
+* CloudFront
+* DynamoDB
+* Lambda
+* API Gateway
+* IAM permissions
+* S3 deployment
+* CloudFront invalidation
+
+The CDK application can synthesize the infrastructure into a CloudFormation template.
+
+```bash
+cd infrastructure
+npx cdk synth
+```
+
+The infrastructure is therefore reproducible from source code.
+
+---
+
+# Automated Static Deployment
+
+The CDK stack uses `BucketDeployment` to deploy the Next.js static output to S3.
+
+The deployment source is:
+
+```text
+out/
+```
+
+The deployment also triggers CloudFront invalidation so updated website files can be served without waiting for existing cached objects to expire.
+
+The deployment flow is:
+
+```text
+Next.js
+   │
+   │ pnpm build
+   ▼
+out/
+   │
+   ▼
+AWS CDK BucketDeployment
+   │
+   ▼
+Private S3
+   │
+   ▼
+CloudFront
+   │
+   │ Invalidation
+   ▼
+Updated website
+```
+
+---
+
+# CI/CD
+
+GitHub Actions is used for continuous integration and deployment.
+
+Workflow:
+
+```text
+Developer
+    │
+    │ git push
+    ▼
+GitHub
+    │
+    ▼
+GitHub Actions
+    │
+    ├── Install dependencies
+    │
+    ├── Install infrastructure dependencies
+    │
+    ├── Run checks
+    │
+    ├── Run tests
+    │
+    ├── Build application
+    │
+    └── Deploy
+         │
+         ▼
+       AWS
+```
+
+The repository contains the workflow:
+
+```text
+.github/workflows/deploy.yml
+```
+
+The workflow installs both the root project dependencies and the dependencies required by the CDK infrastructure project.
+
+The pipeline runs the automated test suite before deployment.
+
+---
+
+# Testing
+
+The project uses **Vitest**.
+
+The test suite currently contains:
+
+* 6 visitor-counter tests
+* 1 AWS CDK infrastructure test
+
+Run the tests with:
+
+```bash
+pnpm test
+```
+
+Current test result:
+
+```text
+Test Files  2 passed (2)
+Tests       7 passed (7)
+```
+
+The infrastructure test synthesizes the CDK stack and verifies that the Cloud Resume S3 bucket is created with the expected server-side encryption configuration.
+
+This helps prevent infrastructure changes from silently breaking the expected AWS architecture.
+
+---
+
+# IAM
+
+IAM is used for both human access and AWS service permissions.
+
+## Human Access
+
+A dedicated IAM user is used for this Cloud Resume AWS project rather than using the AWS root account for everyday operations.
 
 The AWS root account is reserved for account-level operations.
 
-The Lambda execution role uses a separate IAM role with restricted DynamoDB permissions.
+MFA is enabled for the IAM user.
 
-This project therefore demonstrates two different IAM concepts:
+## Lambda Access
+
+Lambda uses an IAM execution role to access AWS resources.
+
+The role provides the permissions required for the visitor counter to interact with DynamoDB.
+
+The principle used is:
 
 ```text
-Human user
-    │
-    ▼
-IAM User
-    │
-    └── AWS console access
-
-
-Lambda
-    │
-    ▼
-IAM Execution Role
-    │
-    └── DynamoDB permissions
+Only grant a service the permissions it needs.
 ```
 
 ---
 
-## Environment Variables
+# Environment Variables
 
 Local development uses:
 
@@ -417,9 +620,23 @@ Local development uses:
 NEXT_PUBLIC_VISITOR_API_URL=https://<api-id>.execute-api.<region>.amazonaws.com/visitor
 ```
 
-The `.env.local` file should **not** be committed to GitHub.
+A local environment file can be created as:
 
-The repository should contain `.env.example` instead:
+```text
+.env.local
+```
+
+The actual environment file should not be committed to GitHub.
+
+The repository should use:
+
+```text
+.env.example
+```
+
+for documenting required environment variables.
+
+Example:
 
 ```env
 NEXT_PUBLIC_VISITOR_API_URL=
@@ -427,120 +644,126 @@ NEXT_PUBLIC_VISITOR_API_URL=
 
 ---
 
-## Deployment Process
+# Local Development
 
-The current deployment process is:
-
-### 1. Develop locally
+Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-### 2. Build the static website
+Run the development server:
+
+```bash
+pnpm dev
+```
+
+Run tests:
+
+```bash
+pnpm test
+```
+
+Run the production build:
 
 ```bash
 pnpm build
 ```
 
-Next.js generates:
+The static production output is generated in:
 
 ```text
 out/
 ```
 
-### 3. Upload the build to S3
+---
 
-Upload the **contents** of `out/` to the root of the S3 bucket.
+# Deployment
 
-Do not upload the `out/` folder itself.
+Deployment is automated through GitHub Actions.
 
-Correct:
-
-```text
-S3
-├── index.html
-├── 404.html
-├── _next/
-├── favicon.ico
-└── ...
-```
-
-Not:
+The general process is:
 
 ```text
-S3
-└── out/
-    ├── index.html
-    └── _next/
+1. Make changes locally
+        ↓
+2. Run tests
+        ↓
+3. Commit changes
+        ↓
+4. Push to GitHub
+        ↓
+5. GitHub Actions runs checks
+        ↓
+6. Application is built
+        ↓
+7. CDK deployment runs
+        ↓
+8. Static files are deployed to S3
+        ↓
+9. CloudFront cache is invalidated
+        ↓
+10. Production website is updated
 ```
 
-### 4. Invalidate CloudFront
-
-After uploading a new build, create a CloudFront invalidation:
-
-```text
-/*
-```
-
-This forces CloudFront to retrieve the updated files from S3.
-
-### 5. Verify production
-
-Open:
+The production website is:
 
 ```text
 https://cloud.ama24.my
 ```
 
-Then perform a hard refresh if necessary.
-
 ---
 
-## Security Considerations
+# Security Considerations
 
-The project intentionally avoids making the S3 bucket public.
+The architecture intentionally keeps the S3 storage layer private.
 
-Security configuration:
+Security-related configuration includes:
 
 * S3 Block Public Access enabled
-* S3 Object Ownership: Bucket owner enforced
-* S3 static website hosting disabled
-* CloudFront Origin Access Control enabled
-* HTTPS enabled
-* ACM certificate configured
-* API CORS restricted to the production domain
-* Lambda IAM permissions restricted to the required DynamoDB operations
-* MFA enabled for the IAM user
+* S3 bucket encryption enabled
+* S3 versioning enabled
+* S3 Object Ownership controls
+* CloudFront Origin Access Control
+* HTTPS through CloudFront
+* ACM TLS certificate
+* IAM-based access control
+* Dedicated IAM user for project access
+* MFA enabled
+* Lambda execution role
+* DynamoDB access through IAM
+* Environment secrets excluded from Git
 
-The architecture follows the principle:
+The overall design follows the principle:
 
-> Make the public application endpoint accessible while keeping the storage layer private.
+> Keep the storage layer private and expose only the services that need to be publicly accessible.
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
 cv-main/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+│
+├── infrastructure/
+│   ├── bin/
+│   │   └── infrastructure.ts
+│   ├── lib/
+│   │   └── infrastructure-stack.ts
+│   ├── test/
+│   │   └── infrastructure.test.ts
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── cdk.json
+│
 ├── public/
 │
 ├── src/
 │   ├── app/
 │   │   ├── components/
-│   │   │   ├── certifications.tsx
-│   │   │   ├── education.tsx
-│   │   │   ├── header.tsx
-│   │   │   ├── interests.tsx
-│   │   │   ├── key-certification.tsx
-│   │   │   ├── languages.tsx
-│   │   │   ├── projects.tsx
-│   │   │   ├── skills.tsx
-│   │   │   ├── summary.tsx
-│   │   │   ├── technical-credentials.tsx
-│   │   │   ├── visitor-info-bar.tsx
-│   │   │   ├── volunteering.tsx
-│   │   │   └── work-experience.tsx
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   ├── page.tsx
@@ -550,6 +773,9 @@ cv-main/
 │   ├── data/
 │   │   └── resume-data.ts
 │   └── lib/
+│
+├── tests/
+│   └── visitor-counter.test.ts
 │
 ├── .env.example
 ├── .gitignore
@@ -564,120 +790,142 @@ cv-main/
 
 ---
 
-## What I Learned
+# Key Concepts Learned
 
-This project was built as a practical introduction to AWS cloud architecture.
+This project was built as a practical introduction to cloud infrastructure and serverless architecture.
 
-Key concepts covered:
+## S3 vs CloudFront
 
-### CloudFront vs S3
+Amazon S3 stores the website files.
 
-S3 stores the files.
+Amazon CloudFront delivers those files globally.
 
-CloudFront delivers the files.
+The S3 bucket does not need to be publicly accessible.
 
-The browser does not need direct public access to S3.
+## CloudFront Origin Access Control
 
-### API Gateway vs Lambda
+Origin Access Control allows CloudFront to access a private S3 origin.
+
+This removes the need to expose the S3 bucket directly to the internet.
+
+## API Gateway vs Lambda
 
 API Gateway provides the HTTP endpoint.
 
 Lambda executes the backend logic.
 
-### Lambda vs DynamoDB
+## Lambda vs DynamoDB
 
-Lambda performs the operation.
+Lambda performs the visitor-counter operation.
 
-DynamoDB stores the persistent data.
+DynamoDB provides persistent storage for the counter.
 
-### IAM
+## IAM
 
-IAM controls who and what can access AWS resources.
+IAM controls authentication and authorization across AWS resources.
 
-### CORS
+## CORS
 
-CORS controls which browser origins can make requests to the API.
+CORS controls which browser origins can make cross-origin requests to the API.
 
-### CloudFront invalidation
+## DynamoDB Atomic Updates
 
-Uploading a new file to S3 does not necessarily mean CloudFront immediately serves it.
+DynamoDB's `ADD` operation allows the visitor counter to be incremented atomically without first reading and then writing the value.
 
-An invalidation tells CloudFront to discard cached objects.
+## Infrastructure as Code
 
-### Static export
+AWS CDK allows infrastructure to be defined in TypeScript and version-controlled alongside the application.
 
-A Next.js application can be exported into static files and served through S3 + CloudFront without running a permanent application server.
+## CI/CD
+
+GitHub Actions automatically runs checks and deployment steps after changes are pushed to GitHub.
+
+## Static Export
+
+Next.js can be exported as static files and served through S3 and CloudFront without running a permanent Node.js application server.
 
 ---
 
-## AWS Region
+# AWS Regions
 
-The primary AWS region used for the application is:
+The primary application region is:
 
 ```text
 Asia Pacific (Singapore)
 ap-southeast-1
 ```
 
-The ACM certificate for CloudFront is created in:
+The ACM certificate used by CloudFront is provisioned in:
 
 ```text
 us-east-1
 ```
 
-CloudFront requires ACM certificates for custom distributions to be provisioned in `us-east-1`.
+CloudFront requires its ACM certificate to be in the `us-east-1` region.
 
 ---
 
-## Cloud Resume Challenge
+# Cloud Resume Challenge
 
 This project was created as a practical implementation of the [AWS Cloud Resume Challenge](https://github.com/stinkifolk).
 
-The challenge provided the motivation to move the resume from a conventional web deployment toward a cloud-native architecture using AWS services.
+The challenge provided the motivation to move the resume from a conventional web deployment toward a cloud-based architecture.
 
-The implementation focuses on understanding the underlying infrastructure rather than simply deploying a website.
+The implementation goes beyond simply hosting a static webpage by incorporating:
+
+* Serverless architecture
+* Visitor tracking
+* Infrastructure as Code
+* Automated testing
+* CI/CD
+* HTTPS
+* CDN delivery
+* Private S3 storage
+* IAM-based access control
+
+The goal was to learn the underlying AWS services by building and deploying a working application.
 
 ---
 
-## Future Improvements
+# Current Status
 
-Potential improvements include:
+| Component                | Status           |
+| ------------------------ | ---------------- |
+| Resume website           | Live             |
+| Custom domain            | `cloud.ama24.my` |
+| HTTPS                    | Enabled          |
+| Amazon S3                | Production       |
+| Amazon CloudFront        | Production       |
+| Origin Access Control    | Enabled          |
+| API Gateway              | Production       |
+| AWS Lambda               | Production       |
+| DynamoDB visitor counter | Working          |
+| AWS CDK                  | Implemented      |
+| GitHub Actions CI/CD     | Passing          |
+| Automated tests          | 7/7 passing      |
+| Cloudflare DNS           | Configured       |
 
-* Infrastructure as Code using AWS CDK or Terraform
-* CI/CD deployment using GitHub Actions
-* Automated S3 deployment
-* Automated CloudFront invalidation
-* Custom CloudWatch monitoring
-* Lambda logging and alarms
-* Cost monitoring
-* Automated testing
+---
+
+# Future Improvements
+
+Potential future improvements include:
+
+* CloudWatch dashboards
+* CloudWatch alarms
+* Lambda error monitoring
+* AWS cost monitoring
 * Security hardening
 * Separate development and production environments
-* Improved visitor analytics
+* Automated infrastructure testing
+* More comprehensive integration tests
+* Visitor analytics
+* Improved deployment observability
+* Automated dependency updates
 
 ---
 
-## Current Status
-
-**Production:** Live
-
-**Website:** https://cloud.ama24.my
-
-**Visitor counter:** Working
-
-**Hosting:** Amazon S3 + CloudFront
-
-**Backend:** API Gateway + Lambda + DynamoDB
-
-**DNS:** Cloudflare
-
-**HTTPS:** AWS Certificate Manager
-
-**Infrastructure:** AWS Console configured manually
-
----
-
-## License
+# License
 
 This repository contains personal resume content and project implementation.
 
