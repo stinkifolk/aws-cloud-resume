@@ -39,3 +39,9 @@ next-env.d.ts
 
 # ide
 .idea
+
+# AWS CDK
+/infrastructure/node_modules/
+/infrastructure/cdk.out/
+/infrastructure/.cache/
+cdk.out.yaml
