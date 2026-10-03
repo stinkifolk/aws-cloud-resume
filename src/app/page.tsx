@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "https://cv.jarocki.me/opengraph-image",
+        url: "https://cloud.ama24.my/opengraph-image",
         width: 1200,
         height: 630,
         alt: `${RESUME_DATA.name}'s profile picture`,
@@ -37,128 +37,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${RESUME_DATA.name} - Resume | AWS Cloud Resume`,
     description: RESUME_DATA.about,
-    images: ["https://cv.jarocki.me/opengraph-image"],
+    images: ["https://cloud.ama24.my/opengraph-image"],
   },
 };
-
-/**
- * Transform social links for command menu
- * Transform data for command menu autocomplete and search
- */
-function getCommandMenuSections() {
-  return [
-    {
-      id: "about-section",
-      title: "About",
-      keywords: ["summary", "profile", "bio", "intro"],
-    },
-    {
-      id: "certifications-section",
-      title: "Certifications and Licenses",
-      keywords: [
-        "security+",
-        "iso",
-        "aws",
-        "credly",
-        "certifications",
-        "licenses",
-      ],
-    },
-    {
-      id: "skills-section",
-      title: "Skills",
-      keywords: ["technologies", "cloud", "devops", "tools", "software"],
-    },
-    {
-      id: "side-projects",
-      title: "Cloud Projects",
-      keywords: ["projects", "serverless", "iac", "portfolio", "cloud"],
-    },
-    {
-      id: "relevant-experience",
-      title: "Relevant Experience",
-      keywords: ["work", "experience", "jobs", "career", "employment"],
-    },
-    {
-      id: "education-section",
-      title: "Education",
-      keywords: ["degree", "university", "college", "school"],
-    },
-    {
-      id: "other-experience",
-      title: "Other Experience",
-      keywords: ["career break", "bug bounty", "hackerone", "tutor", "stem"],
-    },
-    {
-      id: "volunteering-section",
-      title: "Volunteering",
-      keywords: ["volunteer", "community", "ngo", "impact hub"],
-    },
-    {
-      id: "interests-section",
-      title: "Interests",
-      keywords: ["hobbies", "rock climbing", "marathon", "travel"],
-    },
-    {
-      id: "languages-section",
-      title: "Languages",
-      keywords: ["english", "malay", "fluent"],
-    },
-  ];
-}
-
-function getCommandMenuProjects() {
-  return RESUME_DATA.projects
-    .filter(
-      (
-        project
-      ): project is typeof project & {
-        link: { href: string; label: string };
-      } => Boolean(project.link)
-    )
-    .map((project) => ({
-      url: project.link.href,
-      title: project.title,
-      keywords: ["project", ...project.techStack],
-    }));
-}
-
-function getCommandMenuLinks() {
-  const links = [];
-
-  if (RESUME_DATA.personalWebsiteUrl) {
-    links.push({
-      url: RESUME_DATA.personalWebsiteUrl,
-      title: "Personal Website",
-      keywords: ["website", "portfolio"],
-    });
-  }
-
-  if (RESUME_DATA.contact.email) {
-    links.push({
-      url: `mailto:${RESUME_DATA.contact.email}`,
-      title: `Email: ${RESUME_DATA.contact.email}`,
-      keywords: ["email", "contact", "mail"],
-    });
-  }
-
-  if (RESUME_DATA.contact.tel) {
-    links.push({
-      url: `tel:${RESUME_DATA.contact.tel}`,
-      title: `Phone: ${RESUME_DATA.contact.tel}`,
-      keywords: ["phone", "call", "telephone", "mobile"],
-    });
-  }
-
-  return [
-    ...links,
-    ...RESUME_DATA.contact.social.map((socialMediaLink) => ({
-      url: socialMediaLink.url,
-      title: socialMediaLink.name,
-      keywords: [socialMediaLink.name.toLowerCase(), "social", "profile"],
-    })),
-  ];
-}
 
 export default function ResumePage() {
   const structuredData = generateResumeStructuredData();
@@ -309,11 +190,7 @@ export default function ResumePage() {
         </section>
 
         <nav className="print:hidden" aria-label="Quick navigation">
-          <CommandMenu
-            links={getCommandMenuLinks()}
-            projects={getCommandMenuProjects()}
-            sections={getCommandMenuSections()}
-          />
+          <CommandMenu />
         </nav>
       </main>
     </>

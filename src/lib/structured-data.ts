@@ -2,12 +2,12 @@ import { RESUME_DATA } from "@/data/resume-data";
 
 export function generatePersonStructuredData() {
   return {
-    "@context": "https://schema.org",
     "@type": "Person",
+    "@id": "https://cloud.ama24.my/#person",
     name: RESUME_DATA.name,
     alternateName: RESUME_DATA.initials,
     description: RESUME_DATA.about,
-    url: RESUME_DATA.personalWebsiteUrl || undefined,
+    url: RESUME_DATA.personalWebsiteUrl || "https://cloud.ama24.my",
     image: RESUME_DATA.avatarUrl,
     sameAs: RESUME_DATA.contact.social.map((social) => social.url),
     address: {
@@ -17,7 +17,6 @@ export function generatePersonStructuredData() {
     contactPoint: {
       "@type": "ContactPoint",
       email: RESUME_DATA.contact.email,
-      telephone: RESUME_DATA.contact.tel,
       contactType: "personal",
     },
     jobTitle: RESUME_DATA.about,
@@ -26,7 +25,7 @@ export function generatePersonStructuredData() {
         ? {
             "@type": "Organization",
             name: RESUME_DATA.work[0].company,
-            url: RESUME_DATA.work[0].link,
+            url: RESUME_DATA.work[0].link || undefined,
           }
         : undefined,
     alumniOf: RESUME_DATA.education.map((edu) => ({
@@ -89,22 +88,21 @@ export function generatePersonStructuredData() {
 
 export function generateWebPageStructuredData() {
   return {
-    "@context": "https://schema.org",
     "@type": "WebPage",
+    "@id": "https://cloud.ama24.my/#webpage",
     name: `${RESUME_DATA.name} - Resume`,
     description: RESUME_DATA.about,
-    url: "https://cv.jarocki.me",
+    url: "https://cloud.ama24.my",
     inLanguage: "en-US",
     isPartOf: {
       "@type": "WebSite",
+      "@id": "https://cloud.ama24.my/#website",
       name: `${RESUME_DATA.name}'s Professional Resume`,
-      url: "https://cv.jarocki.me",
+      url: "https://cloud.ama24.my",
     },
     about: {
-      "@type": "Person",
-      name: RESUME_DATA.name,
+      "@id": "https://cloud.ama24.my/#person",
     },
-    mainEntity: generatePersonStructuredData(),
   };
 }
 
@@ -112,5 +110,8 @@ export function generateResumeStructuredData() {
   const person = generatePersonStructuredData();
   const webPage = generateWebPageStructuredData();
 
-  return [person, webPage];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [person, webPage],
+  };
 }

@@ -9,34 +9,25 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
+  CommandShortcut,
 } from "@/components/ui/command";
+import { RESUME_DATA } from "@/data/resume-data";
 import { Button } from "./ui/button";
 
-export interface CommandMenuItem {
-  url: string;
-  title: string;
-  keywords?: readonly string[];
-}
-
-export interface CommandMenuSectionItem {
-  id: string;
-  title: string;
-  keywords?: readonly string[];
-}
-
-interface Props {
-  links: CommandMenuItem[];
-  projects?: CommandMenuItem[];
-  sections?: CommandMenuSectionItem[];
-}
-
-export const CommandMenu = ({ links, projects, sections }: Props) => {
+export const CommandMenu = () => {
   const [open, setOpen] = React.useState(false);
   const [isMac, setIsMac] = React.useState(false);
+  const [copiedKey, setCopiedKey] = React.useState<string | null>(null);
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setIsMac(window.navigator.userAgent.includes("Mac"));
+
+    // Ensure light mode only
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.remove("dark");
+      localStorage.removeItem("theme");
+    }
 
     const down = (e: KeyboardEvent) => {
       if ((e.key === "j" || e.key === "k") && (e.metaKey || e.ctrlKey)) {
@@ -48,6 +39,38 @@ export const CommandMenu = ({ links, projects, sections }: Props) => {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  const copyToClipboard = async (text: string, key: string, message: string = "Copied!") => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+
+      setCopiedKey(key);
+      setToastMessage(message);
+
+      setTimeout(() => {
+        setCopiedKey(null);
+        setOpen(false);
+      }, 400);
+
+      setTimeout(() => {
+        setToastMessage(null);
+      }, 2500);
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      setCopiedKey(null);
+    }
+  };
 
   return (
     <>
@@ -67,92 +90,60 @@ export const CommandMenu = ({ links, projects, sections }: Props) => {
       >
         <CommandIcon className="my-6 size-6" />
       </Button>
+
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 rounded-full border bg-foreground text-background px-4 py-2 text-xs font-medium shadow-xl animate-fade-in print:hidden"
+        >
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Actions">
             <CommandItem
-              value="Print"
-              keywords={["pdf", "export", "save", "print"]}
+              value="Print Resume"
+              keywords={["pdf", "export", "save", "print", "download"]}
               onSelect={() => {
                 setOpen(false);
                 window.print();
               }}
             >
-              <span>Print</span>
+              <span>Print / Save as PDF</span>
+              <CommandShortcut>{isMac ? "⌘P" : "Ctrl+P"}</CommandShortcut>
             </CommandItem>
-          </CommandGroup>
-          <CommandGroup heading="Links">
-            {links.map(({ url, title }) => (
+
+            <CommandItem
+              value="Copy Resume Link"
+              keywords={["copy", "link", "url", "share"]}
+              onClick={() => {
+                copyToClipboard("https://cloud.ama24.my/", "link", "Link copied!");
+              }}
+            >
+              <span>
+                {copiedKey === "link" ? "Copied!" : "Copy Resume Link"}
+              </span>
+            </CommandItem>
+
+            {RESUME_DATA.contact.email && (
               <CommandItem
-                key={url}
-                onSelect={() => {
-                  setOpen(false);
-                  window.open(url, "_blank");
+                value="Copy Email"
+                keywords={["email", "mail", "contact", "copy"]}
+                onClick={() => {
+                  copyToClipboard(RESUME_DATA.contact.email, "email", "Email copied!");
                 }}
               >
-                <span>{title}</span>
+                <span>
+                  {copiedKey === "email" ? "Copied!" : "Copy Email"}
+                </span>
               </CommandItem>
-            ))}
+            )}
           </CommandGroup>
-
-          {sections && sections.length > 0 && (
-            <CommandGroup heading="Page Sections">
-              {sections.map(({ id, title, keywords }) => (
-                <CommandItem
-                  key={`section-${id}`}
-                  value={title}
-                  keywords={keywords ? [...keywords] : undefined}
-                  onSelect={() => {
-                    setOpen(false);
-                    const element = document.getElementById(id);
-                    element?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                >
-                  <span>{title}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {projects && projects.length > 0 && (
-            <CommandGroup heading="Projects">
-              {projects.map(({ url, title, keywords }) => (
-                <CommandItem
-                  key={`project-${title}`}
-                  value={title}
-                  keywords={keywords ? [...keywords] : undefined}
-                  onSelect={() => {
-                    setOpen(false);
-                    window.open(url, "_blank");
-                  }}
-                >
-                  <span>{title}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {links && links.length > 0 && (
-            <CommandGroup heading="Links & Contact">
-              {links.map(({ url, title, keywords }) => (
-                <CommandItem
-                  key={`link-${title}-${url}`}
-                  value={title}
-                  keywords={keywords ? [...keywords] : undefined}
-                  onSelect={() => {
-                    setOpen(false);
-                    window.open(url, "_blank");
-                  }}
-                >
-                  <span>{title}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          <CommandSeparator />
         </CommandList>
       </CommandDialog>
     </>

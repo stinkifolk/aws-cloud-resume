@@ -19,7 +19,6 @@ export const RESUME_DATA: ResumeData = {
 
   contact: {
     email: "stinkifolk@gmail.com",
-    tel: "016-940 2402",
 
     social: [
       {
@@ -197,11 +196,11 @@ export const RESUME_DATA: ResumeData = {
       attribution: {
         text: "Built and deployed as part of the",
         linkText: "AWS Cloud Resume Challenge",
-        href: "https://github.com/stinkifolk",
+        href: "https://github.com/stinkifolk/aws-cloud-resume",
       },
       link: {
         label: "GitHub",
-        href: "https://github.com/stinkifolk",
+        href: "https://github.com/stinkifolk/aws-cloud-resume",
       },
     },
     {
@@ -217,7 +216,7 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Built a serverless AWS cost analysis tool using Cost Explorer API and Lambda to analyze usage trends and trigger alerts.",
       highlights: [
-        "Built a serverless AWS cost analysis tool using Cost Explorer API and Lambda to analyze usage trends, estimate monthly spend, and trigger automated cost alerts.",
+        "Analyzed AWS usage trends and estimated monthly spend with automated threshold alerts.",
         "Provisioned infrastructure with Terraform for repeatable deployment and teardown.",
       ],
       link: {
@@ -231,8 +230,8 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Built an automated AWS backup and restore workflow using S3 versioning, lifecycle policies, and event-driven automation.",
       highlights: [
-        "Built an automated AWS backup and restore workflow using S3 versioning, lifecycle policies, IAM, and event-driven automation.",
-        "Provisioned storage, IAM policies, and event triggers with Terraform and validated recovery by restoring previous object versions.",
+        "Configured S3 versioning, lifecycle transition policies, and automated event triggers.",
+        "Provisioned infrastructure with Terraform and validated disaster recovery by restoring previous object versions.",
       ],
       link: {
         label: "GitHub",
@@ -245,7 +244,7 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Built a serverless website monitoring service using Lambda, CloudWatch, and SNS to periodically check endpoint availability.",
       highlights: [
-        "Built a serverless website monitoring service using Lambda, CloudWatch, and SNS to periodically check endpoint availability and send failure notifications.",
+        "Configured automated endpoint health checks with real-time failure alerts via CloudWatch and SNS.",
         "Implemented GitHub Actions CI/CD to automatically test and deploy Lambda function updates.",
       ],
       link: {
@@ -281,7 +280,6 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Developed practical AWS experience across serverless computing, containers, networking, databases, monitoring, security, and infrastructure as code.",
       highlights: [
-        "Developed practical AWS experience across serverless computing, containers, networking, databases, monitoring, security, and infrastructure as code.",
         "Designed and deployed learning architectures using Lambda, API Gateway, DynamoDB, EC2, RDS, VPC, Route 53, Auto Scaling, ECS, ECR, S3, and CloudFront.",
         "Applied AWS Well-Architected principles covering security, reliability, performance efficiency, and cost optimization through hands-on labs and projects.",
       ],
@@ -304,7 +302,6 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Maintained and monitored IT infrastructure, systems, network services, hardware, and software to support system availability and reliable day-to-day operations.",
       highlights: [
-        "Maintained and monitored IT infrastructure, systems, network services, hardware, and software to support system availability and reliable day-to-day operations.",
         "Troubleshot system, network, and application issues using structured diagnostic approaches and escalated complex incidents when required.",
         "Managed user access, system configurations, software updates, backups, and preventive maintenance to support security, reliability, and business continuity.",
         "Monitored system performance and availability, investigated incidents, and implemented corrective actions to minimize service disruptions.",
@@ -325,7 +322,6 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Founded and managed a design practice, coordinating multidisciplinary teams, clients, consultants, and project delivery across residential, commercial, and hospitality projects.",
       highlights: [
-        "Founded and managed a design practice, coordinating multidisciplinary teams, clients, consultants, and project delivery across residential, commercial, and hospitality projects.",
         "Managed project schedules, documentation, stakeholder communication, and delivery from concept through completion.",
       ],
     },
@@ -344,7 +340,6 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Prepare and coordinate architectural drawings, working drawings, technical details, presentations, and documentation.",
       highlights: [
-        "Prepare and coordinate architectural drawings, working drawings, technical details, presentations, and documentation.",
         "Ensure project documentation and design work comply with building regulations, standards, and project requirements.",
       ],
     },
@@ -369,9 +364,7 @@ export const RESUME_DATA: ResumeData = {
       end: "Jan 2023",
       description:
         "International travel and professional career exploration, followed by focused transition into cloud computing and IT.",
-      highlights: [
-        "International travel and professional career exploration, followed by focused transition into cloud computing and IT.",
-      ],
+      highlights: [],
     },
     {
       company: "HackerOne (Remote)",
@@ -390,7 +383,6 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Conducted security testing of public-facing web applications through responsible vulnerability disclosure programs.",
       highlights: [
-        "Conducted security testing of public-facing web applications through responsible vulnerability disclosure programs.",
         "Identified and responsibly disclosed 20+ vulnerabilities across 10+ application scopes, including IDOR, XSS, and broken authentication.",
         "Produced reproducible proof-of-concept reports documenting attack vectors, business impact, reproduction steps, and remediation guidance.",
       ],
@@ -410,7 +402,6 @@ export const RESUME_DATA: ResumeData = {
       description:
         "Tutored and delivered STEM and design-thinking learning experiences using LEGO Education systems.",
       highlights: [
-        "Tutored and delivered STEM and design-thinking learning experiences using LEGO Education systems.",
         "Designed instructional sessions covering STEM, problem-solving, and design-thinking concepts.",
         "Guided students through project-based development, iterative problem solving, and collaborative presentations.",
       ],
@@ -426,9 +417,7 @@ export const RESUME_DATA: ResumeData = {
       end: "Aug 2019",
       description:
         "Led empowerment oriented initiatives in a local NGO in Malaysia by providing lectures to staff on team building exercises, effective communication techniques, and stress management tools, as a means to economically empower the local underprivileged women and children.",
-      highlights: [
-        "Led empowerment oriented initiatives in a local NGO in Malaysia by providing lectures to staff on team building exercises, effective communication techniques, and stress management tools, as a means to economically empower the local underprivileged women and children.",
-      ],
+      highlights: [],
     },
   ],
 
