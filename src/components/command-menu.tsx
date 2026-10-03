@@ -40,7 +40,11 @@ export const CommandMenu = () => {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const copyToClipboard = async (text: string, key: string, message: string = "Copied!") => {
+  const copyToClipboard = async (
+    text: string,
+    key: string,
+    message = "Copied!"
+  ) => {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
@@ -92,13 +96,12 @@ export const CommandMenu = () => {
       </Button>
 
       {toastMessage && (
-        <div
-          role="status"
+        <output
           aria-live="polite"
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 rounded-full border bg-foreground text-background px-4 py-2 text-xs font-medium shadow-xl animate-fade-in print:hidden"
         >
           <span>{toastMessage}</span>
-        </div>
+        </output>
       )}
 
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -122,7 +125,11 @@ export const CommandMenu = () => {
               value="Copy Resume Link"
               keywords={["copy", "link", "url", "share"]}
               onClick={() => {
-                copyToClipboard("https://cloud.ama24.my/", "link", "Link copied!");
+                copyToClipboard(
+                  "https://cloud.ama24.my/",
+                  "link",
+                  "Link copied!"
+                );
               }}
             >
               <span>
@@ -135,12 +142,14 @@ export const CommandMenu = () => {
                 value="Copy Email"
                 keywords={["email", "mail", "contact", "copy"]}
                 onClick={() => {
-                  copyToClipboard(RESUME_DATA.contact.email, "email", "Email copied!");
+                  copyToClipboard(
+                    RESUME_DATA.contact.email,
+                    "email",
+                    "Email copied!"
+                  );
                 }}
               >
-                <span>
-                  {copiedKey === "email" ? "Copied!" : "Copy Email"}
-                </span>
+                <span>{copiedKey === "email" ? "Copied!" : "Copy Email"}</span>
               </CommandItem>
             )}
           </CommandGroup>
